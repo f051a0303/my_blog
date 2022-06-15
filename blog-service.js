@@ -91,7 +91,7 @@ module.exports.getPostsByCategory = function(category){
             }
         }
 
-        if(posts.length == 0){
+        if(selectedPosts.length == 0){
             reject("no results returned");
         }else{
             resolve(selectedPosts);
@@ -109,7 +109,7 @@ module.exports.getPostsByMinDate = function(minDateStr){
             }
         }
 
-        if(posts.length == 0){
+        if(selectedPosts.length == 0){
             reject("no results returned");
         }else{
             resolve(selectedPosts);

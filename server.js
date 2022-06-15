@@ -113,6 +113,7 @@ app.get("/posts",(req,res)=>{
         data.getPostsByCategory(parseInt(req.query.category)).then((data)=>{
             res.json(data);
         }).catch((err)=>{
+            res.json({message: "no results returned"});
             console.log("Failed to show posts by category");
         });
     }
@@ -121,6 +122,7 @@ app.get("/posts",(req,res)=>{
         data.getPostsByMinDate(req.query.minDate).then((data)=>{
             res.json(data);
         }).catch((err)=>{
+            res.json({message: "no results returned"});
             console.log("Failed to show posts by min Date");
         });
     }
@@ -131,6 +133,7 @@ app.get("/post/:id", (req,res)=>{
     data.getPostById(req.params.id).then((data)=>{
         res.json(data);
     }).catch((err)=>{
+        res.json({message: "no results returned"});
         console.log("Failed to show posts by ID");
     });
 
