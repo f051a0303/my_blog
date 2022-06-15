@@ -5,7 +5,7 @@
 * 
 *  Name: _____Chi Ming Lai______ Student ID: ___158400200_____ Date: __14-06-2022_______
 *
-*  Online (Heroku) Link: ______https://boiling-earth-40990.herokuapp.com/________
+*  Online (Heroku) Link: ______https://boiling-earth-40990.herokuapp.com/______
 *
 ********************************************************************************/
 // require libraries
@@ -83,10 +83,7 @@ app.post("/posts/add", upload.single("featureImage"), (req,res)=>{
         data.addPost(req.body).then(()=>{
             res.redirect("/posts");
         });
-    
     });
-    
-    
 });
 
 
