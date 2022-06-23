@@ -67,12 +67,13 @@ module.exports.getCategories = function(){
     });
 }
 
-// Add post
+// assignment 3 function
 module.exports.addPost = function(postData){
     return new Promise((resolve,reject)=>{
         
         postData.id = posts.length + 1; // set the id property of postData to be the length of the "posts" array plus one (1). 
         postData.published = (postData.published)? true:false; //o	If postData.published is undefined, explicitly set it to false, otherwise set it to true    
+        postData.postDate = new Date().toISOString().slice(0, 10);
         posts.push(postData);  // o	Push the updated PostData object onto the "posts" array 
         resolve(); // resolve the Promise
     });
@@ -135,4 +136,23 @@ module.exports.getPostById = function(id){
             resolve(matchPost);
         }
     })
+}
+
+//Assignment 4 function
+module.exports.getPublishedPostsByCategory = function(category){
+    return new Promise((resolve,reject)=>{
+        let publishedPostsByCat = [];
+        for(let i = 0; i < posts.length; i++){
+            if(posts[i].published == true && posts[i].category == category){
+                publishedPostsByCat.push(posts[i]);
+            }
+        }
+
+        if(publishedPostsByCat.length == 0){
+            reject("No posts returned");
+        }else{
+            resolve(publishedPostsByCat);
+        }
+
+    });
 }
