@@ -1,5 +1,5 @@
 /*********************************************************************************
-*  WEB322 – Assignment 04
+*  WEB322 – Assignment 05
 *  I declare that this assignment is my own work in accordance with Seneca  Academic Policy.  No part *  of this assignment has been copied manually or electronically from any other source 
 *  (including 3rd party web sites) or distributed to other students.
 * 
@@ -52,7 +52,14 @@ app.engine('.hbs', exphbs.engine({
         },
         safeHTML: function(context){
             return stripJs(context);
+        },
+        formatDate: function(dateObj){
+            let year = dateObj.getFullYear();
+            let month = (dateObj.getMonth() + 1).toString();
+            let day = dateObj.getDate().toString();
+            return `${year}-${month.padStart(2, '0')}-${day.padStart(2,'0')}`;
         }
+        
     } }));
 app.set('view engine', '.hbs');
 
@@ -64,6 +71,9 @@ app.use(function(req,res,next){
     app.locals.viewingCategory = req.query.category;
     next();
 });
+
+// new middleware for add categories
+app.use(express.urlencoded({extended:true}));
 
 var onHTTPStart = () => {
     console.log("Express http server listening on " + HTTP_PORT);
@@ -85,8 +95,17 @@ app.get("/about", function(req,res){
 
 //assignment 4, change to hbs
 app.get("/posts/add",(req,res)=>{
+   data.getCategories().then((data)=>{
+        res.render("addPost", {categories: data});
+   }).catch((err)=>{
+    res,render("addPost", {categories: []});
+   })
+});
+
+//as5 function
+app.get("/categories/add",(req,res)=>{
    
-    res.render('addPost',{
+    res.render('addCategory',{
     data: isAbsolute,
     layout: "main"
    });
@@ -124,8 +143,18 @@ app.post("/posts/add", upload.single("featureImage"), (req,res)=>{
         // TODO: Process the req.body and add it as a new Blog Post before redirecting to /posts
         data.addPost(req.body).then(()=>{
             res.redirect("/posts");
-        });
+        }).catch((err)=>{
+            res.render("posts", {message: "failed to add post"});
+        })
     });
+});
+
+// as5 
+app.post("/categories/add", (req,res)=>{
+
+    data.addCategory(req.body).then(()=>{
+        res.redirect("/categories");
+    })
 });
 
 
@@ -227,13 +256,17 @@ app.get('/blog/:id', async (req, res) => {
     res.render("blog", {data: viewData})
 });
 
-// assignment 4 update to res.render
+// as5 updated
 app.get("/posts",(req,res)=>{
 
     // if no filter
     if(!req.query.category && !req.query.minDate){
         data.getAllPosts().then((data)=>{
-            res.render("posts",{posts:data, layout:"main"});
+            if(data.length >0){
+                res.render("posts",{posts:data, layout:"main"});
+            }else{
+                res.render("posts", {message: "no results"});
+            }
         }).catch((err)=>{
             res.render("posts", {message: "no results"});
             console.log("Failed to show posts");
@@ -243,7 +276,11 @@ app.get("/posts",(req,res)=>{
     // if by category
     if(req.query.category){
         data.getPostsByCategory(parseInt(req.query.category)).then((data)=>{
-            res.render("posts",{posts:data, layout:"main"});
+            if(data.length >0){
+                res.render("posts",{posts:data, layout:"main"});
+            }else{
+                res.render("posts", {message: "no results"});
+            }
         }).catch((err)=>{
             res.render("posts", {message: "no results returned"});
             console.log("Failed to show posts by category");
@@ -252,7 +289,11 @@ app.get("/posts",(req,res)=>{
     // if by min Date
     if(req.query.minDate){
         data.getPostsByMinDate(req.query.minDate).then((data)=>{
-            res.render("posts",{posts:data, layout:"main"});
+            if(data.length >0){
+                res.render("posts",{posts:data, layout:"main"});
+            }else{
+                res.render("posts", {message: "no results"});
+            }
         }).catch((err)=>{
             res.render("posts", {message: "no results returned"});
             console.log("Failed to show posts by min Date");
@@ -276,12 +317,35 @@ app.get("/post/:id", (req,res)=>{
 // assignment 4 update render
 app.get("/categories",(req,res)=>{
     data.getCategories().then((data)=>{
-        res.render("categories",{categories:data, layout:"main"});
+        if(data.length >0){
+            res.render("categories",{categories:data, layout:"main"});
+        }else{
+            res.render("categories", {message: "no results"});
+        }
     }).catch((err)=>{
         res.render("categories", {message: "no results"});
         console.log("Failed to show categories");
     });
 });
+
+app.get("/categories/delete/:id", (req,res)=>{
+    data.deleteCategoryById(req.params.id).then(()=>{
+        res.redirect("/categories");
+    }).catch((err)=>{
+        res.status(500).send({message: "Unable to Remove Category/Category not found"});
+        console.log("Unable to Remove Category/Category not found");
+    })
+})
+
+app.get("/posts/delete/:id", (req,res)=>{
+    data.deletePostById(req.params.id).then(()=>{
+        res.redirect("/posts");
+    }).catch((err)=>{
+        res.status(500).send({message: "Unable to Remove Post/Post not found"});
+        console.log("Unable to Remove Post/Post not found");
+    })
+})
+
 
 app.use((req,res)=>{
     res.status(404).render("error", {layout:"main"});
@@ -293,4 +357,7 @@ data.initialize().then(()=>{
 }).catch((err)=>{
     console.log("Failed to start the server: " + err);
 });
+
+
+
     

@@ -9,7 +9,7 @@
             {{#safeHTML data.post.body}}{{/safeHTML}}
             <br /><br />
             <strong>Category:</strong> {{data.post.category}}<br />
-            <strong>Last Updated:</strong> {{data.post.postDate}}
+            <strong>Last Updated:</strong> {{#formatDate data.post.postDate}}{{/formatDate}} <!-- change in as 5 -->
 
         </article>
     {{else}}
@@ -36,7 +36,7 @@
             <h4>Categories</h4>
             {{#each data.categories}}
                 <ul class="list-group">
-                <a href=/blog?category={{id}} class="list-group-item">{{category}}</a>
+                    <a href=/blog?category={{id}} class="list-group-item">{{category}}</a>
                 </ul>
             {{/each}}
         {{else}}
