@@ -17,6 +17,7 @@ var Post = sequelize.define('Post', {
     published: Sequelize.BOOLEAN
 });
 
+
 var Category = sequelize.define('Category', {
     category: Sequelize.STRING
 });

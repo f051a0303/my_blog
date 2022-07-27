@@ -1,0 +1,50 @@
+<div class="row">
+  <div class="col-md-12">
+
+    <h2>Register</h2>
+    <hr>
+    {{#if errorMessage}}
+        <div class="alert alert-danger"> 
+            <strong>Error:</strong> {{errorMessage}}
+        </div>
+    {{/if}}
+
+    {{#if successMessage}}
+        <div class="alert alert-success"> 
+            <strong>Success:</strong> {{successMessage}}
+        </div>
+        <a class="btn btn-success pull-right" href="/login">&nbsp;&nbsp;&nbsp;Proceed to Log in&nbsp;&nbsp;&nbsp;</a><br /><br /><br />
+    {{/if}}
+
+    {{#unless successMessage}}
+        <form method="post" action="/register">
+        <label for="userName"></label>
+        <input type="text" class="form-control" name="userName" id="userName" placeholder="User Name" required>
+        <br/>
+        <label for="password"></label>
+        <input type="password" class="form-control" name="password" id="password" placeholder="Password" required>
+         <br/>
+        <label for="password2"></label>
+        <input type="password" class="form-control" name="password2" id="password2" placeholder="Confirm Password" required>
+        <br/>
+        <label for="email"></label>
+        <input type="email" class="form-control" name="email" id="email" placeholder="Email Address" required>
+
+        <hr />
+
+        <input
+        type="submit"
+        class="btn btn-primary pull-right"
+        value="Register"
+      /><br /><br /><br />
+
+
+        </div>
+    
+    
+    </form>
+        
+    {{/unless}}
+    </div>
+</div>
+

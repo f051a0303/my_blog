@@ -1,9 +1,9 @@
 /*********************************************************************************
-*  WEB322 – Assignment 05
+*  WEB322 – Assignment 06
 *  I declare that this assignment is my own work in accordance with Seneca  Academic Policy.  No part *  of this assignment has been copied manually or electronically from any other source 
 *  (including 3rd party web sites) or distributed to other students.
 * 
-*  Name: _____Chi Ming Lai______ Student ID: ___158400200_____ Date: __30-06-2022_______
+*  Name: _____Chi Ming Lai______ Student ID: ___158400200_____ Date: __26-07-2022_______
 *
 *  Online (Heroku) Link: ______https://boiling-earth-40990.herokuapp.com/______
 *
@@ -16,6 +16,7 @@ const cloudinary = require('cloudinary').v2;
 const streamifier = require('streamifier');
 const exphbs = require('express-handlebars');
 const stripJs = require('strip-js');
+const clientSessions = require('client-sessions');
 var app = express();
 //
 // set cloudinary config
@@ -29,10 +30,41 @@ cloudinary.config({
 const upload = multer();
 
 var path = require ("path");
+
 const data = require("./blog-service.js");
+const authData = require("./authService.js");
+
 const { isAbsolute } = require("path");
 var HTTP_PORT = process.env.PORT || 8080;
 app.use(express.static("public"));
+
+//-------------------------------------------------------------//
+//-------------------------Client Session----------------------//
+// a6 middle ware (client sessions)
+app.use(clientSessions({
+    cookieName:"session",
+    secret:"Web322Application",
+    duration: 2 * 60 * 1000,
+    activeDuration: 1000 * 60
+}));
+
+// middleWare
+app.use(function(req,res,next){
+    res.locals.session = req.session;
+    next();
+})
+
+// Helper middleware function
+var ensureLogin = (req,res,next)=>{
+    if(!req.session.user){
+        res.redirect("/login");
+    }else{
+        next();
+    }
+}
+//-------------------------Client Session----------------------//
+//-------------------------------------------------------------//
+
 app.engine('.hbs', exphbs.engine({ 
     extname: '.hbs',
     helpers:{
@@ -94,7 +126,7 @@ app.get("/about", function(req,res){
 });
 
 //assignment 4, change to hbs
-app.get("/posts/add",(req,res)=>{
+app.get("/posts/add", ensureLogin, (req,res)=>{
    data.getCategories().then((data)=>{
         res.render("addPost", {categories: data});
    }).catch((err)=>{
@@ -103,7 +135,7 @@ app.get("/posts/add",(req,res)=>{
 });
 
 //as5 function
-app.get("/categories/add",(req,res)=>{
+app.get("/categories/add", ensureLogin, (req,res)=>{
    
     res.render('addCategory',{
     data: isAbsolute,
@@ -113,7 +145,7 @@ app.get("/categories/add",(req,res)=>{
 
 
 // assignment 3
-app.post("/posts/add", upload.single("featureImage"), (req,res)=>{
+app.post("/posts/add", ensureLogin, upload.single("featureImage"), (req,res)=>{
 
     let streamUpload = (req) => {
         return new Promise((resolve, reject) => {
@@ -150,7 +182,7 @@ app.post("/posts/add", upload.single("featureImage"), (req,res)=>{
 });
 
 // as5 
-app.post("/categories/add", (req,res)=>{
+app.post("/categories/add", ensureLogin, (req,res)=>{
 
     data.addCategory(req.body).then(()=>{
         res.redirect("/categories");
@@ -257,7 +289,7 @@ app.get('/blog/:id', async (req, res) => {
 });
 
 // as5 updated
-app.get("/posts",(req,res)=>{
+app.get("/posts", ensureLogin, (req,res)=>{
 
     // if no filter
     if(!req.query.category && !req.query.minDate){
@@ -303,7 +335,7 @@ app.get("/posts",(req,res)=>{
 
 
 // assignment 4 update render
-app.get("/post/:id", (req,res)=>{
+app.get("/post/:id", ensureLogin, (req,res)=>{
     data.getPostById(req.params.id).then((data)=>{
         res.render("posts",{posts:data, layout:"main"});
     }).catch((err)=>{
@@ -315,7 +347,7 @@ app.get("/post/:id", (req,res)=>{
 
 
 // assignment 4 update render
-app.get("/categories",(req,res)=>{
+app.get("/categories", ensureLogin, (req,res)=>{
     data.getCategories().then((data)=>{
         if(data.length >0){
             res.render("categories",{categories:data, layout:"main"});
@@ -328,7 +360,7 @@ app.get("/categories",(req,res)=>{
     });
 });
 
-app.get("/categories/delete/:id", (req,res)=>{
+app.get("/categories/delete/:id", ensureLogin, (req,res)=>{
     data.deleteCategoryById(req.params.id).then(()=>{
         res.redirect("/categories");
     }).catch((err)=>{
@@ -337,7 +369,7 @@ app.get("/categories/delete/:id", (req,res)=>{
     })
 })
 
-app.get("/posts/delete/:id", (req,res)=>{
+app.get("/posts/delete/:id", ensureLogin,  (req,res)=>{
     data.deletePostById(req.params.id).then(()=>{
         res.redirect("/posts");
     }).catch((err)=>{
@@ -346,17 +378,65 @@ app.get("/posts/delete/:id", (req,res)=>{
     })
 })
 
+// -------------------- Login -----------------------------
+
+app.get("/login", (req,res)=>{
+    res.render("login",{layout:"main"});
+})
+
+app.get("/register", (req,res)=>{
+    res.render("register",{layout:"main"});
+})
+
+
+app.post("/register",(req,res)=>{
+    authData.registerUser(req.body).then(()=>{
+        res.render("register",{successMessage:"User created"});
+    }).catch((err)=>{
+        res.render("register",{errorMessage:err, userName:req.body.userName});
+    });
+})
+
+app.post("/login",(req,res)=>{
+    req.body.userAgent = req.get('User-Agent');
+    authData.checkUser(req.body).then((user)=>{
+        req.session.user = {
+            userName:user.userName,
+            email:user.email,
+            loginHistory:user.loginHistory
+        }
+
+        res.redirect('/posts');
+    }).catch((err)=>{
+        res.render("login",{errorMessage:err, userName:req.body.userName});
+    });
+})
+
+app.get("/logout",(req,res)=>{
+    req.session.reset();
+    res.redirect('/');
+})
+
+app.get("/userHistory",ensureLogin,(req,res)=>{
+    res.render("userHistory",{layout:"main"});
+})
+
+
+
+//---------------------------------------------------------
+
 
 app.use((req,res)=>{
     res.status(404).render("error", {layout:"main"});
 });
 
-// start the server 
-data.initialize().then(()=>{
+// start the server updated
+data.initialize().then(authData.initialize).then(()=>{
     app.listen(HTTP_PORT,onHTTPStart);
 }).catch((err)=>{
     console.log("Failed to start the server: " + err);
 });
+
 
 
 
