@@ -50,7 +50,7 @@ module.exports.registerUser = function(userData){
     return new Promise(function(resolve, reject){
         if(userData.password != userData.password2){
             reject("Passwords do not match");
-        }else if(containSpaces(userData.password) || containSpaces(userData.userName)){ //UserName or password not allow to have spaces
+        }else if(containSpaces(userData.password) || containSpaces(userData.userName)){ //UserName or password are not allow to have spaces
             reject("User name and password cannot contain spaces");
         }else{
             bcrypt.hash(userData.password,10).then(hash=>{
