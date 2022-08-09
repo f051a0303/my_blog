@@ -169,7 +169,7 @@ app.post("/posts/add", ensureLogin, upload.single("featureImage"), (req,res)=>{
         req.body.featureImage = uploaded.url;
     
         // TODO: Process the req.body and add it as a new Blog Post before redirecting to /posts
-        data.addPost(req.body).then(()=>{
+        data.addPost(req.body, name).then(()=>{
             res.redirect("/posts");
         }).catch((err)=>{
             res.render("posts", {message: "failed to add post"});
@@ -388,10 +388,14 @@ app.get("/register", (req,res)=>{
 app.post("/register",(req,res)=>{
     authData.registerUser(req.body).then(()=>{
         res.render("register",{successMessage:"User created"});
+    
     }).catch((err)=>{
         res.render("register",{errorMessage:err, userName:req.body.userName});
     });
 })
+//
+var name;
+//
 
 app.post("/login",(req,res)=>{
     req.body.userAgent = req.get('User-Agent');
@@ -401,7 +405,9 @@ app.post("/login",(req,res)=>{
             email:user.email,
             loginHistory:user.loginHistory
         }
-
+        //
+        name = req.session.user.userName;
+        //
         res.redirect('/posts');
     }).catch((err)=>{
         res.render("login",{errorMessage:err, userName:req.body.userName});

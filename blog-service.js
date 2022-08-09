@@ -1,4 +1,7 @@
 const Sequelize = require('sequelize');
+// --
+const authData = require("./authService.js");
+//---
 var sequelize = new Sequelize('dbgfc016d0sq8j', 'kzpbqlyhqinmpw', 'ea0c1d458c7788bcbeacaa549410b5084de4819eb95559bba22c13cb08c0f1c1', {
     host: 'ec2-44-195-162-77.compute-1.amazonaws.com',
     dialect: 'postgres',
@@ -14,7 +17,8 @@ var Post = sequelize.define('Post', {
     title: Sequelize.STRING,
     postDate: Sequelize.DATE,
     featureImage: Sequelize.STRING,
-    published: Sequelize.BOOLEAN
+    published: Sequelize.BOOLEAN,
+    name: Sequelize.STRING
 });
 
 
@@ -97,7 +101,7 @@ module.exports.getPostById = function(p_id){
 }
 
 
-module.exports.addPost = function (postData) {
+module.exports.addPost = function (postData, name) {
     return new Promise((resolve, reject)=>{
         postData.published = postData.published ? true : false;
 
@@ -105,6 +109,9 @@ module.exports.addPost = function (postData) {
             if (postData[prop] === '')
                 postData[prop] = null;
         }
+        //
+        postData.name = name;
+        //
 
         postData.postDate = new Date();
 
