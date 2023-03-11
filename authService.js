@@ -24,7 +24,8 @@ let User;
 // initialize the connection to mongodb
 module.exports.initialize = function(){
     return new Promise(function(resolve,reject){
-        let db = mongoose.createConnection("mongodb+srv://alexlai7777:F051a0303@senecaweb.emtof.mongodb.net/web322_week8");
+        //let db = mongoose.createConnection("mongodb+srv://alexlai7777:F051a0303@senecaweb.emtof.mongodb.net/web322_week8");
+        let db   = mongoose.createConnection("mongodb+srv://alexlai77777:F051a0303@cluster0.ctygwlh.mongodb.net/web322_week8?retryWrites=true&w=majority");
         
         db.on('error',err=>{
             reject(err);

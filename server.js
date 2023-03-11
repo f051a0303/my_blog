@@ -391,7 +391,7 @@ app.post("/register",(req,res)=>{
     
     }).catch((err)=>{
         res.render("register",{errorMessage:err, userName:req.body.userName});
-    });
+    });   
 })
 //
 var name;
